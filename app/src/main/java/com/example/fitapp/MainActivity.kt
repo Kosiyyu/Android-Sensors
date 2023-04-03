@@ -20,24 +20,22 @@ import com.github.mikephil.charting.data.LineDataSet
 class MainActivity : AppCompatActivity(), SensorEventListener {
 
     private lateinit var sensorManager: SensorManager
+
     private lateinit var stepCounter: StepCounter
     private lateinit var stepDetector: StepDetector
     private lateinit var accelerometer: Accelerometer
+    private lateinit var gyroscope: Gyroscope
+
     private lateinit var textView: TextView
-    private lateinit var lineChart: LineChart
+    private lateinit var accelerometerChart: LineChart
+    private lateinit var gyroscopeChart: LineChart
 
-    private var queueX = GraphQueue(maxSize = 1000)
-    private var queueY = GraphQueue(maxSize = 1000)
-    private var queueZ = GraphQueue(maxSize = 1000)
-
-    private var lineDataSet1: LineDataSet? = null
-    private var lineDataSet2: LineDataSet? = null
-    private var lineDataSet3: LineDataSet? = null
+    private val accelerometerQueue = GraphQueue(maxSize = 100)
+    private val gyroscopeQueue = GraphQueue(maxSize = 100)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
 
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACTIVITY_RECOGNITION) == PackageManager.PERMISSION_DENIED){
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACTIVITY_RECOGNITION), 1)
@@ -46,27 +44,42 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.BODY_SENSORS), 2)
         }
 
-
         sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
-
         textView = findViewById(R.id.textView)
-
-        lineChart = findViewById(R.id.line_chart)
-        lineChart.axisLeft.isEnabled = true
-        lineChart.axisRight.isEnabled = true
-        lineChart.description.isEnabled = false
-        lineChart.legend.isEnabled = true
-        lineChart.legend.textColor = Color.WHITE
+        accelerometerChart = findViewById(R.id.accelerometer_chart)
+        gyroscopeChart = findViewById(R.id.gyroscope_chart)
 
         accelerometer = Accelerometer(sensorManager)
         //accelerometer.registerListener()
         sensorManager.registerListener(this, accelerometer.sensor, SensorManager.SENSOR_DELAY_NORMAL)
+
+        gyroscope = Gyroscope(sensorManager)
+        //gyroscope.registerListener()
+        sensorManager.registerListener(this, gyroscope.sensor, SensorManager.SENSOR_DELAY_NORMAL)
 
         stepCounter = StepCounter(sensorManager)
         stepCounter.registerListener()
 
         stepDetector = StepDetector(sensorManager)
         stepDetector.registerListener()
+
+        accelerometerChart.axisLeft.isEnabled = true
+        accelerometerChart.axisRight.isEnabled = true
+        accelerometerChart.description.isEnabled = false
+        accelerometerChart.legend.isEnabled = true
+        accelerometerChart.legend.textColor = Color.WHITE
+        accelerometerChart.xAxis.textColor = Color.WHITE
+        accelerometerChart.axisLeft.textColor = Color.WHITE
+        accelerometerChart.axisRight.textColor = Color.WHITE
+
+        gyroscopeChart.axisLeft.isEnabled = true
+        gyroscopeChart.axisRight.isEnabled = true
+        gyroscopeChart.description.isEnabled = false
+        gyroscopeChart.legend.isEnabled = true
+        gyroscopeChart.legend.textColor = Color.WHITE
+        gyroscopeChart.xAxis.textColor = Color.WHITE
+        gyroscopeChart.axisLeft.textColor = Color.WHITE
+        gyroscopeChart.axisRight.textColor = Color.WHITE
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -95,11 +108,19 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             val y = event.values[1]
             val z = event.values[2]
 
-            queueX.add(x)
-            queueY.add(y)
-            queueZ.add(z)
+            accelerometerQueue.add(x, y, z)
 
-            graphUpdate()
+            accelerometerGraphUpdate()
+        }
+
+        if(event?.sensor?.type == Sensor.TYPE_GYROSCOPE){
+            val x = event.values[0]
+            val y = event.values[1]
+            val z = event.values[2]
+
+            gyroscopeQueue.add(x, y, z)
+
+            gyroscopeGraphUpdate()
         }
     }
 
@@ -115,29 +136,57 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         super.onDestroy()
     }
 
-    private fun graphUpdate() {
-        lineDataSet1 = LineDataSet(queueX.getQueue(), "Data Set 1")
-        lineDataSet1?.color = Color.RED
-        lineDataSet1?.valueTextColor = Color.WHITE
-        lineDataSet1?.setDrawValues(false)
-        lineDataSet1?.setDrawIcons(false)
-        lineDataSet1?.setDrawCircles(false)
+    private fun accelerometerGraphUpdate() {
+        val queues = accelerometerQueue.getQueue()
+        val lineDataSetX = LineDataSet(queues.first, "x")
+        lineDataSetX.color = Color.RED
+        lineDataSetX.valueTextColor = Color.WHITE
+        lineDataSetX.setDrawValues(false)
+        lineDataSetX.setDrawIcons(false)
+        lineDataSetX.setDrawCircles(false)
 
-        lineDataSet2 = LineDataSet(queueY.getQueue(), "Data Set 2")
-        lineDataSet2?.color = Color.BLUE
-        lineDataSet2?.valueTextColor = Color.WHITE
-        lineDataSet2?.setDrawValues(false)
-        lineDataSet2?.setDrawIcons(false)
-        lineDataSet2?.setDrawCircles(false)
+        val lineDataSetY = LineDataSet(queues.second, "y")
+        lineDataSetY.color = Color.BLUE
+        lineDataSetY.valueTextColor = Color.WHITE
+        lineDataSetY.setDrawValues(false)
+        lineDataSetY.setDrawIcons(false)
+        lineDataSetY.setDrawCircles(false)
 
-        lineDataSet3 = LineDataSet(queueZ.getQueue(), "Data Set 3")
-        lineDataSet3?.color = Color.GREEN
-        lineDataSet3?.valueTextColor = Color.WHITE
-        lineDataSet3?.setDrawValues(false)
-        lineDataSet3?.setDrawIcons(false)
-        lineDataSet3?.setDrawCircles(false)
+        val lineDataSetZ = LineDataSet(queues.third, "z")
+        lineDataSetZ.color = Color.GREEN
+        lineDataSetZ.valueTextColor = Color.WHITE
+        lineDataSetZ.setDrawValues(false)
+        lineDataSetZ.setDrawIcons(false)
+        lineDataSetZ.setDrawCircles(false)
 
-        lineChart.data = LineData(lineDataSet1, lineDataSet2, lineDataSet3)
-        lineChart.invalidate()
+        accelerometerChart.data = LineData(lineDataSetX, lineDataSetY, lineDataSetZ)
+        accelerometerChart.invalidate()
+    }
+
+    private fun gyroscopeGraphUpdate() {
+        val queues = gyroscopeQueue.getQueue()
+        val lineDataSetX = LineDataSet(queues.first, "x")
+        lineDataSetX.color = Color.RED
+        lineDataSetX.valueTextColor = Color.WHITE
+        lineDataSetX.setDrawValues(false)
+        lineDataSetX.setDrawIcons(false)
+        lineDataSetX.setDrawCircles(false)
+
+        val lineDataSetY = LineDataSet(queues.second, "y")
+        lineDataSetY.color = Color.BLUE
+        lineDataSetY.valueTextColor = Color.WHITE
+        lineDataSetY.setDrawValues(false)
+        lineDataSetY.setDrawIcons(false)
+        lineDataSetY.setDrawCircles(false)
+
+        val lineDataSetZ = LineDataSet(queues.third, "z")
+        lineDataSetZ.color = Color.GREEN
+        lineDataSetZ.valueTextColor = Color.WHITE
+        lineDataSetZ.setDrawValues(false)
+        lineDataSetZ.setDrawIcons(false)
+        lineDataSetZ.setDrawCircles(false)
+
+        gyroscopeChart.data = LineData(lineDataSetX, lineDataSetY, lineDataSetZ)
+        gyroscopeChart.invalidate()
     }
 }

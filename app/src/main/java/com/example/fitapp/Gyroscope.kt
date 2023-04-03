@@ -7,18 +7,19 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.util.Log
 
-class Accelerometer(private val sensorManager: SensorManager) : SensorEventListener, LocalSensor {
+class Gyroscope(private val sensorManager: SensorManager) : SensorEventListener, LocalSensor {
     private var x: Float? = null
     private var y: Float? = null
     private var z: Float? = null
-    val sensor: Sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+    val sensor: Sensor = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
 
     override fun onSensorChanged(event: SensorEvent?) {
         event?.values.let{it ->
             x = it?.get(0)
             y = it?.get(1)
             z = it?.get(2)
-            Log.w("TYPE_ACCELEROMETER","$x, $y, $z")
+            //Log.w("TYPE_GYROSCOPE","$x, $y, $z")
+
         }
     }
 
