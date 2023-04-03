@@ -12,9 +12,7 @@ class Accelerometer(private val sensorManager: SensorManager) : SensorEventListe
     private var x: Float? = null
     private var y: Float? = null
     private var z: Float? = null
-    private var sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-
-
+    val sensor: Sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
 
     override fun onSensorChanged(event: SensorEvent?) {
         event?.values.let{it ->
@@ -22,6 +20,7 @@ class Accelerometer(private val sensorManager: SensorManager) : SensorEventListe
             y = it?.get(1)
             z = it?.get(2)
             //Log.w("TYPE_ACCELEROMETER","$x, $y, $z")
+
         }
     }
 
