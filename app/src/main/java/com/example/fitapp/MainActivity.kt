@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.components.Description
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 
@@ -66,6 +67,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         accelerometerChart.axisLeft.isEnabled = true
         accelerometerChart.axisRight.isEnabled = true
         accelerometerChart.description.isEnabled = false
+        accelerometerChart.description = Description().apply {
+            text = "Accelerometer"
+            textColor = Color.WHITE
+        }
         accelerometerChart.legend.isEnabled = true
         accelerometerChart.legend.textColor = Color.WHITE
         accelerometerChart.xAxis.textColor = Color.WHITE
@@ -75,6 +80,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         gyroscopeChart.axisLeft.isEnabled = true
         gyroscopeChart.axisRight.isEnabled = true
         gyroscopeChart.description.isEnabled = false
+        gyroscopeChart.description = Description().apply {
+            text = "Gyroscope"
+            textColor = Color.WHITE
+        }
         gyroscopeChart.legend.isEnabled = true
         gyroscopeChart.legend.textColor = Color.WHITE
         gyroscopeChart.xAxis.textColor = Color.WHITE
@@ -146,14 +155,14 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         lineDataSetX.setDrawCircles(false)
 
         val lineDataSetY = LineDataSet(queues.second, "y")
-        lineDataSetY.color = Color.BLUE
+        lineDataSetY.color = Color.GREEN
         lineDataSetY.valueTextColor = Color.WHITE
         lineDataSetY.setDrawValues(false)
         lineDataSetY.setDrawIcons(false)
         lineDataSetY.setDrawCircles(false)
 
         val lineDataSetZ = LineDataSet(queues.third, "z")
-        lineDataSetZ.color = Color.GREEN
+        lineDataSetZ.color = Color.BLUE
         lineDataSetZ.valueTextColor = Color.WHITE
         lineDataSetZ.setDrawValues(false)
         lineDataSetZ.setDrawIcons(false)
@@ -173,14 +182,14 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         lineDataSetX.setDrawCircles(false)
 
         val lineDataSetY = LineDataSet(queues.second, "y")
-        lineDataSetY.color = Color.BLUE
+        lineDataSetY.color = Color.GREEN
         lineDataSetY.valueTextColor = Color.WHITE
         lineDataSetY.setDrawValues(false)
         lineDataSetY.setDrawIcons(false)
         lineDataSetY.setDrawCircles(false)
 
         val lineDataSetZ = LineDataSet(queues.third, "z")
-        lineDataSetZ.color = Color.GREEN
+        lineDataSetZ.color = Color.BLUE
         lineDataSetZ.valueTextColor = Color.WHITE
         lineDataSetZ.setDrawValues(false)
         lineDataSetZ.setDrawIcons(false)
